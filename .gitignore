@@ -43,16 +43,18 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Build files
+# Build outputs
+build/
 *.apk
-*.aab
-*.ipa
-*.dSYM.zip
-*.dSYM
+*.aar
 *.so
 *.zip
 
 # Firebase
-**/android/app/google-services.json
-**/ios/Runner/GoogleService-Info.plist
-lib/firebase_options.dart
+**/google-services.json
+**/GoogleService-Info.plist
+firebase_options.dart
+
+# Environment
+.env
+.env.*
