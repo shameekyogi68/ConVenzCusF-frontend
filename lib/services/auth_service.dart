@@ -1,6 +1,7 @@
 import '../services/api_service.dart';
 import '../services/notification_service.dart';
 import '../utils/shared_prefs.dart';
+import '../utils/address_formatter.dart';
 
 class AuthService {
   // ... (register, verify, etc. unchanged) ...
@@ -64,11 +65,15 @@ class AuthService {
     return res;
   }
 
-  static Future<Map<String, dynamic>> updateVendorLocation(String userId, double latitude, double longitude) async {
+  static Future<Map<String, dynamic>> updateUserLocation(String userId, double latitude, double longitude) async {
+    // Get clean, formatted address using the same logic as MapScreen
+    String cleanAddress = await AddressFormatter.getCleanAddress(latitude, longitude);
+    
     final res = await ApiService.post("/update-location", {
       "userId": userId,
       "latitude": latitude,
       "longitude": longitude,
+      "address": cleanAddress, // Send cleaned address to backend
     });
     return res;
   }

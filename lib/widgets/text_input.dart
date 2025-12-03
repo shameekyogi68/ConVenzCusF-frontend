@@ -26,8 +26,8 @@ class TextInput extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        // ✅ CHANGED: Fixed radius of 12 for a rectangular look (was 100)
-        borderRadius: BorderRadius.circular(12),
+        // Fully curved border radius
+        borderRadius: BorderRadius.circular(100),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.05),
@@ -60,17 +60,17 @@ class TextInput extends StatelessWidget {
           ),
           alignLabelWithHint: maxLines > 1,
 
-          // ✅ CHANGED: Updated all borders to match the rectangular container
+          // Fully curved borders
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(100),
             borderSide: const BorderSide(color: AppColors.primaryTeal),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(100),
             borderSide: const BorderSide(color: AppColors.primaryTeal),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(100),
             borderSide: const BorderSide(color: AppColors.accentMint),
           ),
         ),

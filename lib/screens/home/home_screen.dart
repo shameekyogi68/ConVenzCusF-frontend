@@ -118,7 +118,7 @@ class _HomeScreenState extends State<HomeScreen> {
       Position? pos = await LocationService.determinePosition();
 
       if (pos != null) {
-        final response = await AuthService.updateVendorLocation(
+        final response = await AuthService.updateUserLocation(
           userId,
           pos.latitude,
           pos.longitude,

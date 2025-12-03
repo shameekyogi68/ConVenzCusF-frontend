@@ -74,7 +74,7 @@ class LocationService {
 
   static Future<void> _syncLocationToServer(String userId, Position position) async {
     try {
-      final response = await AuthService.updateVendorLocation(
+      final response = await AuthService.updateUserLocation(
           userId, position.latitude, position.longitude
       );
 
