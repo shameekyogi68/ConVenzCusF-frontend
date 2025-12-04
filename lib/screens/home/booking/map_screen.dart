@@ -10,7 +10,9 @@ import '../../../config/app_colors.dart';
 import '../../../widgets/primary_button.dart';
 
 class MapScreen extends StatefulWidget {
-  const MapScreen({super.key});
+  final String? selectedService;
+  
+  const MapScreen({super.key, this.selectedService});
 
   @override
   State<MapScreen> createState() => _MapScreenState();
@@ -344,6 +346,9 @@ class _MapScreenState extends State<MapScreen> {
                     MaterialPageRoute(
                       builder: (context) => ServiceDetailsScreen(
                         address: _selectedAddress,
+                        selectedService: widget.selectedService,
+                        latitude: _center.latitude,
+                        longitude: _center.longitude,
                       ),
                     ),
                   );

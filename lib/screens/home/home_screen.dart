@@ -463,7 +463,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     onPressed: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const MapScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const MapScreen(
+                            selectedService: 'Cleaning',
+                          ),
+                        ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
@@ -575,7 +579,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 onTap: isMoreCard ? null : () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const MapScreen()),
+                    MaterialPageRoute(
+                      builder: (context) => MapScreen(
+                        selectedService: categories[index]['name'],
+                      ),
+                    ),
                   );
                 },
                 child: Container(
