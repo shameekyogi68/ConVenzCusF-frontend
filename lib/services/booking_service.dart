@@ -46,12 +46,13 @@ class BookingService {
         return {"success": false, "message": "User not logged in"};
       }
 
+      // ✅ FIX: Map Flutter fields to exact backend field names
       final bookingData = {
         "userId": userId,
         "selectedService": selectedService,
-        "selectedDate": selectedDate,
-        "selectedTime": selectedTime,
-        "userLocation": userLocation,
+        "date": selectedDate,                    // Backend expects "date" not "selectedDate"
+        "time": selectedTime,                    // Backend expects "time" not "selectedTime"
+        "location": userLocation,                // Backend expects "location" not "userLocation"
         "jobDescription": jobDescription ?? "",
       };
 
@@ -59,7 +60,7 @@ class BookingService {
       if (vendorId != null) bookingData["vendorId"] = vendorId;
       if (price != null) bookingData["price"] = price;
 
-      print("📤 Creating booking: $bookingData");
+      print("📤 Creating booking with correct field names: $bookingData");
 
       final res = await ApiService.post("/user/booking/create", bookingData);
       
