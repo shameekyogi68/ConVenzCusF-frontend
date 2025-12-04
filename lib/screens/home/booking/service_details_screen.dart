@@ -1,15 +1,28 @@
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 
 import '../../../config/app_colors.dart';
 import '../../../widgets/primary_button.dart';
 import '../../../widgets/datetime_picker.dart';
 import '../../../widgets/text_input.dart';
-import 'vendor_search.dart'; // ✅ Import Vendor Search Screen
+import '../../../services/booking_service.dart';
+import '../../../services/location_services.dart';
+import 'booking_confirmation_screen.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
   final String address;
+  final String? selectedService;
+  final double? latitude;
+  final double? longitude;
 
-  const ServiceDetailsScreen({super.key, required this.address});
+  const ServiceDetailsScreen({
+    super.key,
+    required this.address,
+    this.selectedService,
+    this.latitude,
+    this.longitude,
+  });
 
   @override
   State<ServiceDetailsScreen> createState() => _ServiceDetailsScreenState();
@@ -19,10 +32,10 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
   DateTime? _selectedDate;
   TimeOfDay? _selectedTime;
   final TextEditingController _descriptionController = TextEditingController();
+  bool _isLoading = false;
 
-  // Note: _isLoading removed as we navigate immediately
-
-  void _searchVendors() {   // 🔥 Corrected method name
+  void _createBooking() async {
+    // Validation
     if (_selectedDate == null || _selectedTime == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -33,10 +46,92 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const VendorSearchScreen()),
-    );
+    setState(() => _isLoading = true);
+
+    try {
+      // Get current location if not provided
+      double? lat = widget.latitude;
+      double? lng = widget.longitude;
+      
+      if (lat == null || lng == null) {
+        Position? position = await LocationService.determinePosition();
+        if (position != null) {
+          lat = position.latitude;
+          lng = position.longitude;
+        }
+      }
+
+      if (lat == null || lng == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Unable to get location. Please try again."),
+              backgroundColor: Colors.red,
+            ),
+          );
+          setState(() => _isLoading = false);
+        }
+        return;
+      }
+
+      // Format date and time
+      final formattedDate = DateFormat('yyyy-MM-dd').format(_selectedDate!);
+      final formattedTime = _selectedTime!.format(context);
+
+      // Create booking
+      final result = await BookingService.createBooking(
+        selectedService: widget.selectedService ?? 'General Service',
+        selectedDate: formattedDate,
+        selectedTime: formattedTime,
+        userLocation: {
+          'latitude': lat,
+          'longitude': lng,
+          'address': widget.address,
+        },
+        jobDescription: _descriptionController.text.trim(),
+      );
+
+      if (mounted) {
+        setState(() => _isLoading = false);
+
+        if (result['success'] == true) {
+          // Get booking ID from response
+          String bookingId = result['data']?['_id'] ?? result['bookingId'] ?? '';
+
+          // Navigate to confirmation screen
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(
+              builder: (context) => BookingConfirmationScreen(
+                bookingId: bookingId,
+                serviceName: widget.selectedService ?? 'General Service',
+                selectedDate: formattedDate,
+                selectedTime: formattedTime,
+                address: widget.address,
+                jobDescription: _descriptionController.text.trim(),
+              ),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(result['message'] ?? 'Failed to create booking'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -142,10 +237,12 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
 
               SizedBox(height: screenHeight * 0.05),
 
-              PrimaryButton(
-                text: "Search vendors",
-                onPressed: _searchVendors, // 🔥 Correct call
-              ),
+              _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : PrimaryButton(
+                      text: "Create Booking",
+                      onPressed: _createBooking,
+                    ),
 
               const SizedBox(height: 40),
             ],

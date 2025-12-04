@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../config/app_colors.dart';
 import '../../models/booking.dart';
 import '../../services/booking_service.dart';
- // Add intl to pubspec.yaml for date formatting if needed
+import 'booking/booking_tracking_screen.dart';
 
 class MyBookingsScreen extends StatefulWidget {
   const MyBookingsScreen({super.key});
@@ -78,21 +78,31 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
     // Simple date formatter
     String formattedDate = booking.date.split("T")[0];
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          )
-        ],
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: () {
+        // Navigate to booking tracking screen
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => BookingTrackingScreen(bookingId: booking.id),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            )
+          ],
+        ),
+        child: Column(
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -163,6 +173,7 @@ class _MyBookingsScreenState extends State<MyBookingsScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 

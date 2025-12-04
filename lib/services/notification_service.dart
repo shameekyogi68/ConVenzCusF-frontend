@@ -10,14 +10,19 @@ import 'api_service.dart';
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   
-  // Check if it's an OTP notification
+  // Check notification type
   String? type = message.data['type'];
+  
   if (type == 'otp') {
     String? otp = message.data['otp'] ?? message.notification?.body;
     print('🔐 OTP Received: $otp');
-    
-    // Show local notification for OTP
     await NotificationService.showOtpNotification(message);
+  } else if (type == 'BOOKING_STATUS_UPDATE' || type == 'booking_status_update') {
+    print('📋 Background: Booking Status Update');
+    await NotificationService.showBookingNotification(message);
+  } else if (type == 'VENDOR_ASSIGNED' || type == 'vendor_assigned') {
+    print('👤 Background: Vendor Assigned');
+    await NotificationService.showVendorAssignedNotification(message);
   } else {
     await NotificationService.showNotification(message);
   }
@@ -152,14 +157,19 @@ class NotificationService {
 
   /// Handle foreground messages
   static Future<void> _handleForegroundMessage(RemoteMessage message) async {
-    // Check if it's an OTP notification
+    // Check notification type
     String? type = message.data['type'];
+    
     if (type == 'otp') {
       String? otp = message.data['otp'] ?? message.notification?.body;
       print('🔐 OTP Received: $otp');
-      
-      // Show local notification for OTP
       await showOtpNotification(message);
+    } else if (type == 'BOOKING_STATUS_UPDATE' || type == 'booking_status_update') {
+      print('📋 Booking Status Update: ${message.data}');
+      await showBookingNotification(message);
+    } else if (type == 'VENDOR_ASSIGNED' || type == 'vendor_assigned') {
+      print('👤 Vendor Assigned: ${message.data}');
+      await showVendorAssignedNotification(message);
     } else {
       await showNotification(message);
     }
@@ -216,6 +226,82 @@ class NotificationService {
         payload: type ?? '',
       );
     }
+  }
+
+  /// Show booking status update notification
+  static Future<void> showBookingNotification(RemoteMessage message) async {
+    RemoteNotification? notification = message.notification;
+    String? bookingId = message.data['bookingId'];
+    String? status = message.data['status'] ?? message.data['bookingStatus'];
+    
+    String title = notification?.title ?? 'Booking Update';
+    String body = notification?.body ?? 'Your booking status has been updated to: $status';
+    
+    await _localNotifications.show(
+      bookingId?.hashCode ?? DateTime.now().millisecondsSinceEpoch,
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channel.id,
+          _channel.name,
+          channelDescription: _channel.description,
+          importance: Importance.high,
+          priority: Priority.high,
+          showWhen: true,
+          icon: '@mipmap/ic_launcher',
+          playSound: true,
+          enableVibration: true,
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+        ),
+      ),
+      payload: 'booking_update:$bookingId',
+    );
+  }
+
+  /// Show vendor assigned notification
+  static Future<void> showVendorAssignedNotification(RemoteMessage message) async {
+    RemoteNotification? notification = message.notification;
+    String? vendorName = message.data['vendorName'];
+    String? bookingId = message.data['bookingId'];
+    
+    String title = notification?.title ?? '👤 Vendor Assigned!';
+    String body = notification?.body ?? 
+        (vendorName != null 
+            ? '$vendorName has accepted your booking!' 
+            : 'A vendor has accepted your booking!');
+    
+    await _localNotifications.show(
+      bookingId?.hashCode ?? DateTime.now().millisecondsSinceEpoch,
+      title,
+      body,
+      NotificationDetails(
+        android: AndroidNotificationDetails(
+          _channel.id,
+          _channel.name,
+          channelDescription: _channel.description,
+          importance: Importance.max,
+          priority: Priority.max,
+          showWhen: true,
+          icon: '@mipmap/ic_launcher',
+          playSound: true,
+          enableVibration: true,
+          enableLights: true,
+          ticker: 'Vendor Accepted Booking',
+        ),
+        iOS: const DarwinNotificationDetails(
+          presentAlert: true,
+          presentBadge: true,
+          presentSound: true,
+          interruptionLevel: InterruptionLevel.timeSensitive,
+        ),
+      ),
+      payload: 'vendor_assigned:$bookingId',
+    );
   }
 
   /// Show OTP local notification with max priority
