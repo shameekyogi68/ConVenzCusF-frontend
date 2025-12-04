@@ -51,7 +51,7 @@ class _OnboardingCompleteScreenState extends State<OnboardingCompleteScreen>
       Position? position = await LocationService.determinePosition();
 
       if (position != null) {
-        final apiResponse = await AuthService.updateVendorLocation(
+        final apiResponse = await AuthService.updateUserLocation(
           userId,
           position.latitude,
           position.longitude,
