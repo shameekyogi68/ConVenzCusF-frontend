@@ -12,7 +12,7 @@ class ProfileService {
 
     print("📡 Fetching Profile for User ID: $userId");
     // Calls /api/user/profile/1
-    final response = await ApiService.get("/profile/$userId");
+    final response = await ApiService.get("/user/profile/$userId");
     print("📥 Profile Response: $response");
 
     return response;

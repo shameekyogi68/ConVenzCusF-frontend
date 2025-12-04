@@ -11,7 +11,7 @@ class AuthService {
     String? fcmToken = NotificationService.getFcmToken();
     
     // Send both phone and fcmToken in registration request
-    final res = await ApiService.post("/register", {
+    final res = await ApiService.post("/user/register", {
       "phone": phone,
       "fcmToken": fcmToken,
     });
@@ -30,7 +30,7 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>> verifyOtp(String phone, String otp) async {
-    final res = await ApiService.post("/verify-otp", {"phone": phone, "otp": otp});
+    final res = await ApiService.post("/user/verify-otp", {"phone": phone, "otp": otp});
     if (res["success"] == true) {
       if (res["userId"] != null) {
         await SharedPrefs.saveUserId(res["userId"].toString());
@@ -58,7 +58,7 @@ class AuthService {
   // ✅ FIX: Ensure correct endpoint for fetching profile
   static Future<Map<String, dynamic>> getUserDetails(String userId) async {
     // Backend route: /api/user/profile/:userId
-    final res = await ApiService.get("/profile/$userId");
+    final res = await ApiService.get("/user/profile/$userId");
 
     // Return the response 'data' directly if that's how your backend structures it
     // Or return the whole response and let UI parse it (preferred)
@@ -69,7 +69,7 @@ class AuthService {
     // Get clean, formatted address using the same logic as MapScreen
     String cleanAddress = await AddressFormatter.getCleanAddress(latitude, longitude);
     
-    final res = await ApiService.post("/update-location", {
+    final res = await ApiService.post("/user/update-location", {
       "userId": userId,
       "latitude": latitude,
       "longitude": longitude,

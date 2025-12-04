@@ -100,7 +100,7 @@ class FirebaseNotificationService {
 
       print('📤 Saving FCM token to backend for user: $userId');
 
-      final response = await ApiService.post('/update-fcm-token', {
+      final response = await ApiService.post('/user/update-fcm-token', {
         'userId': int.parse(userId),
         'fcmToken': token,
       });
