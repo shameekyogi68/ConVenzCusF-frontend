@@ -7,6 +7,7 @@ import '../../services/location_services.dart';
 import 'my_booking_screen.dart';
 import '../../services/auth_service.dart';
 import '../../utils/shared_prefs.dart';
+import '../../utils/blocking_helper.dart';
 import '../../services/profile_service.dart';
 import '../../services/subscription_service.dart';
 import 'customer_profile_screen.dart';
@@ -48,6 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    
+    // 0. Check if user is blocked (FIRST PRIORITY)
+    _checkUserBlockingStatus();
+    
     // 1. Start Background Tracking
     LocationService.startLocationTracking();
 
@@ -68,35 +73,61 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     });
   }
+  
+  // ✅ NEW: Check if user is blocked on app launch
+  void _checkUserBlockingStatus() async {
+    try {
+      await BlockingHelper.checkUserStatusOnLaunch(context);
+    } catch (e) {
+      print("❌ Error checking blocking status: $e");
+    }
+  }
 
   @override
   void dispose() {
     super.dispose();
   }
 
-  // ✅ FIX: Improved Address Loading Logic
+  // ✅ FIX: Improved Address Loading Logic with better error handling
   void _loadAddressFromDatabase() async {
     try {
       final response = await ProfileService.getProfile();
 
-      if (response['success'] == true && response['data'] != null) {
-        // Check 'address' field in the 'data' object
-        String dbAddress = response['data']['address'] ?? "";
+      if (response['success'] == true) {
+        // Backend returns BOTH 'user' and 'data' - use either
+        final userData = response['data'] ?? response['user'];
+        
+        if (userData != null) {
+          // Get address - check multiple possible locations
+          String dbAddress = userData['address'] ?? 
+                            userData['location']?['address'] ?? 
+                            "";
 
+          if (mounted) {
+            setState(() {
+              if (dbAddress.isNotEmpty) {
+                _currentAddress = dbAddress;
+              } else {
+                _currentAddress = "Location not set";
+              }
+            });
+          }
+        }
+      } else {
+        // Handle failed response
         if (mounted) {
           setState(() {
-            // Only update if we have a valid address, otherwise keep "Loading..."
-            // or set a placeholder if it's truly empty.
-            if (dbAddress.isNotEmpty) {
-              _currentAddress = dbAddress;
-            } else {
-              _currentAddress = "Location not set";
-            }
+            _currentAddress = "Unable to load address";
           });
         }
       }
     } catch (e) {
-      print("Profile Fetch Error: $e");
+      print("❌ Profile Fetch Error: $e");
+      if (mounted) {
+        setState(() {
+          _currentAddress = "Error loading address";
+        });
+      }
     }
   }
 

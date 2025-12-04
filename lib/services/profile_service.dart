@@ -4,18 +4,26 @@ import '../services/api_service.dart';
 class ProfileService {
   // 🔹 GET USER PROFILE
   static Future<Map<String, dynamic>> getProfile() async {
-    final userId = SharedPrefs.getUserId(); // This is now "1", "2", etc.
+    try {
+      final userId = SharedPrefs.getUserId();
 
-    if (userId == null) {
-      return {"success": false, "message": "❌ User ID not found"};
+      if (userId == null) {
+        return {"success": false, "message": "❌ User ID not found"};
+      }
+
+      print("📡 Fetching Profile for User ID: $userId");
+      // Calls /api/user/profile/1
+      final response = await ApiService.get("/user/profile/$userId");
+      print("📥 Profile Response: $response");
+
+      return response;
+    } catch (e) {
+      print("❌ Profile Service Error: $e");
+      return {
+        "success": false,
+        "message": "Failed to fetch profile: $e"
+      };
     }
-
-    print("📡 Fetching Profile for User ID: $userId");
-    // Calls /api/user/profile/1
-    final response = await ApiService.get("/user/profile/$userId");
-    print("📥 Profile Response: $response");
-
-    return response;
   }
 
   // 🔹 UPDATE PROFILE

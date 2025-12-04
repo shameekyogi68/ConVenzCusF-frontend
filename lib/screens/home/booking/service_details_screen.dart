@@ -8,6 +8,7 @@ import '../../../widgets/datetime_picker.dart';
 import '../../../widgets/text_input.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/location_services.dart';
+import '../../../utils/blocking_helper.dart';
 import 'booking_confirmation_screen.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
@@ -93,6 +94,9 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
 
       if (mounted) {
         setState(() => _isLoading = false);
+        
+        // Check if user is blocked
+        BlockingHelper.handleBlockingResponse(context, result);
 
         if (result['success'] == true) {
           // Get booking ID from response
@@ -112,7 +116,8 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
               ),
             ),
           );
-        } else {
+        } else if (result['blocked'] != true) {
+          // Only show error if not blocked (blocked case handled above)
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(result['message'] ?? 'Failed to create booking'),

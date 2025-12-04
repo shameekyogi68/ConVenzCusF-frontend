@@ -51,13 +51,24 @@ class ApiService {
   // -----------------------
   static Map<String, dynamic> _handleResponse(http.Response response) {
     try {
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return body;
+      } else if (response.statusCode == 403) {
+        // Handle blocked user response
+        return {
+          "success": false,
+          "blocked": body['blocked'] ?? false,
+          "blockReason": body['blockReason'] ?? 'Your account has been blocked by admin.',
+          "message": body['message'] ?? 'Account blocked',
+          "statusCode": 403,
+        };
       } else {
         return {
           "success": false,
-          "message":
-          "Server error: ${response.statusCode} ${response.reasonPhrase}"
+          "message": body['message'] ?? "Server error: ${response.statusCode}",
+          "statusCode": response.statusCode,
         };
       }
     } catch (e) {
