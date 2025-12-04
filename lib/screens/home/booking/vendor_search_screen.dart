@@ -23,7 +23,6 @@ class _VendorSearchScreenState extends State<VendorSearchScreen>
   late AnimationController _controller;
   double progress = 0.0;
   Timer? _progressTimer;
-  Timer? _navigationTimer;
 
   @override
   void initState() {
@@ -46,7 +45,7 @@ class _VendorSearchScreenState extends State<VendorSearchScreen>
     });
 
     // Navigate to vendor not found after 1 minute (60 seconds)
-    _navigationTimer = Future.delayed(const Duration(seconds: 60), () {
+    Future.delayed(const Duration(seconds: 60), () {
       if (mounted) {
         Navigator.pushReplacement(
           context,
@@ -58,14 +57,13 @@ class _VendorSearchScreenState extends State<VendorSearchScreen>
           ),
         );
       }
-    }) as Timer?;
+    });
   }
 
   @override
   void dispose() {
     _controller.dispose();
     _progressTimer?.cancel();
-    _navigationTimer?.cancel();
     super.dispose();
   }
 
