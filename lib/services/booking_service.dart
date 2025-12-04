@@ -61,7 +61,7 @@ class BookingService {
 
       print("📤 Creating booking: $bookingData");
 
-      final res = await ApiService.post("/booking/create", bookingData);
+      final res = await ApiService.post("/user/booking/create", bookingData);
       
       print("📥 Booking response: $res");
 
