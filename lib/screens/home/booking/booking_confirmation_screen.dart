@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../config/app_colors.dart';
 import '../../../widgets/primary_button.dart';
-import 'booking_tracking_screen.dart';
+import 'vendor_searching_screen.dart';
 
 class BookingConfirmationScreen extends StatelessWidget {
   final String bookingId;
@@ -208,8 +208,9 @@ class BookingConfirmationScreen extends StatelessWidget {
                   Navigator.pushReplacement(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => BookingTrackingScreen(
+                      builder: (context) => VendorSearchingScreen(
                         bookingId: bookingId,
+                        serviceName: serviceName,
                       ),
                     ),
                   );
