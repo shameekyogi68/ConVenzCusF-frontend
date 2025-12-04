@@ -9,7 +9,7 @@ import '../../../widgets/text_input.dart';
 import '../../../services/booking_service.dart';
 import '../../../services/location_services.dart';
 import '../../../utils/blocking_helper.dart';
-import 'booking_confirmation_screen.dart';
+import 'vendor_search_screen.dart';
 
 class ServiceDetailsScreen extends StatefulWidget {
   final String address;
@@ -102,17 +102,13 @@ class _ServiceDetailsScreenState extends State<ServiceDetailsScreen> {
           // Get booking ID from response
           String bookingId = result['data']?['_id'] ?? result['bookingId'] ?? '';
 
-          // Navigate to confirmation screen
+          // Navigate directly to vendor search screen
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => BookingConfirmationScreen(
+              builder: (context) => VendorSearchScreen(
                 bookingId: bookingId,
                 serviceName: widget.selectedService ?? 'General Service',
-                selectedDate: formattedDate,
-                selectedTime: formattedTime,
-                address: widget.address,
-                jobDescription: _descriptionController.text.trim(),
               ),
             ),
           );
